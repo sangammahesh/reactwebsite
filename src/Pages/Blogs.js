@@ -9,10 +9,27 @@ class Blogs extends Component {
 
         this.state = {
             blogpage: [],
-            search: '',
-            name:''
+            filter: '',
+            name: ''
         }
     }
+
+    // getData = async () => {
+    //     try {
+    //         let response = await Client.getEntries({
+    //             'content_type': "blogs",
+    //             'order': 'sys.createdAt'
+    //         }).then((response) => {
+    //         this.setState({blogpage: response.items})
+    //     })
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // }
+
+    // componentDidMount() {
+    //     this.getData()
+    // }
 
     componentDidMount() {
         Client.getEntries({
@@ -22,24 +39,21 @@ class Blogs extends Component {
         }).then((entries) => {
             this.setState({ blogpage: entries.items })
             //console.log({entries});
-            
+
         })
     }
 
-    seachandle = (e) => {
-        this.setState({ search: e.target.value })
+    handleChange=(event)=>{
+        this.setState({
+            [event.target.name]:event.target.value
+        })
+
     }
 
     render() {
 
-        const { search } = this.state;
-        
-        // const filteredBlogs = this.state.blogpage.filter(items => {
-        //     return items.entries.toLowerCase().indexOf(search.toLowerCase()) !== -1
-        // })
-
-        const filteredBlogs = this.state.blogpage.filter(item =>
-            item.fields.toLowerCase().includes(search.toLowerCase()))
+        const blogpage = this.state.blogpage.filter((items) => {
+            return items.fields.blogTitle.toString().toLowerCase().indexOf(this.state.filter.toLowerCase()) !== -1 })
 
         return (
             
@@ -54,7 +68,10 @@ class Blogs extends Component {
                         <div className="row">
                             <div className="col"></div>
                             <div className="col">
-                                <input label="Search Article" icon="search" onChange={this.seachandle} />
+                                <form>
+                                    <label htmlFor="search">Search :  </label>
+                                    <input type="text" id="search" name="filter" value={this.state.filter} onChange={this.handleChange}/>
+                                </form>
                             </div>
                             <div className="col"></div>
                         </div>
@@ -62,16 +79,18 @@ class Blogs extends Component {
                         {this.state.blogpage.length === 0 ?
                             <div align="center"><img src={BlackLoading} alt="Loading..." /></div> :
                             <div className="row">
-                                {filteredBlogs.map((item, index) => {
+                                {blogpage.map((items, index) => {
                                     return (
                                         <div key={index} className="col-md-6 blog-content">
-                                            <Link to={`../Blogs/${item.fields.slug}`}>
-                                                <img src={item.fields.blogThumbnail.fields.file.url} className="img-blog img-fluid" alt="" /></Link>
+                                            <Link to={`../Blogs/${items.fields.slug}`}>
+                                                
+                                                <img src={items.fields.blogThumbnail.fields.file.url} className="img-blog img-fluid" alt="" /></Link>
 
-                                            <h3><Link to={`../Blogs/${item.fields.slug}`}>{item.fields.blogTitle}</Link></h3>
+                                            <h3><Link to={`../Blogs/${items.fields.slug}`}>{items.fields.blogTitle}</Link></h3>
 
-                                            <p className="truncate">{item.fields.blogDescription}</p>
-                                            <button className="btn btn-primary"><Link to={`../Blogs/${item.fields.slug}`}>Read more...</Link></button>
+                                            <p className="truncate">{items.fields.blogDescription}</p>
+                                    <button className="btn btn-primary"><Link to={`../Blogs/${items.fields.slug}`}>Read more...</Link></button>
+                                            
                                         </div>
                                     )
                                 }
